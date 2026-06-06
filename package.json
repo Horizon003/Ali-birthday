@@ -1,0 +1,13 @@
+{
+  "name": "ali-haider-birthday-room",
+  "version": "1.0.0",
+  "description": "Ali Haider Online Birthday Room — Trio Back Birthday Bash (realtime 3-player birthday celebration web app)",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  },
+  "license": "MIT"
+}

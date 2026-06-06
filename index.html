@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0420" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Ali Haider Online Birthday Room 🎂 | Trio Back Birthday Bash</title>
+  <meta name="description" content="A private magical online birthday room for Ali Haider — Trio Back is here to celebrate the Birthday Bear." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ===== Animated Background Layers ===== -->
+  <div id="bg-stars" class="bg-layer"></div>
+  <div id="bg-sparkles" class="bg-layer"></div>
+  <div id="bg-balloons" class="bg-layer"></div>
+  <div id="confetti-canvas-wrap"><canvas id="confetti-canvas"></canvas></div>
+
+  <!-- ===== Top Bar (me badge + connection + controls) ===== -->
+  <div class="topbar">
+    <!-- who am I -->
+    <span id="me-badge" class="me-badge hidden" title="This is your profile">
+      <span id="me-emoji">🐼</span><span id="me-name">Panda</span>
+    </span>
+    <!-- trio server connection -->
+    <span id="conn-badge" class="conn-badge" title="Trio server connection">
+      <span class="conn-dot"></span><span id="conn-text">connecting…</span>
+    </span>
+    <span class="topbar-spacer"></span>
+    <button id="music-toggle" class="icon-btn" title="Music On/Off">🔇</button>
+    <span id="mode-badge" class="mode-badge">demo</span>
+    <button id="reset-btn" class="icon-btn hidden" title="Reset whole room (replay)">♻️</button>
+    <button id="logout-btn" class="icon-btn hidden" title="Switch profile">🚪</button>
+  </div>
+
+  <!-- ===== Trio join/presence strip (under the connection badge) ===== -->
+  <div id="trio-strip" class="trio-strip hidden" title="Who has joined the Trio">
+    <span class="trio-strip-label">Trio:</span>
+    <span class="trio-member" data-user="panda"><span class="tm-emoji">🐼</span><span class="tm-state"></span></span>
+    <span class="trio-member" data-user="bear"><span class="tm-emoji">🐻</span><span class="tm-state"></span></span>
+    <span class="trio-member" data-user="icebear"><span class="tm-emoji">🐻‍❄️</span><span class="tm-state"></span></span>
+  </div>
+
+  <!-- ===== Floating reaction layer ===== -->
+  <div id="reaction-layer"></div>
+
+  <!-- ===== Global presence banner (typing / who-is-where) ===== -->
+  <div id="presence-banner" class="presence-banner hidden">
+    <span id="presence-text"></span>
+    <button id="presence-open" class="presence-open hidden">Open Chat 💬</button>
+  </div>
+
+  <!-- ===== Final Fireworks CALL banner (shows until everyone is on the final screen) ===== -->
+  <div id="fw-call-banner" class="fw-call-banner hidden">
+    <span class="fw-call-text">🎆 Haris called everyone for the <b>Final Fireworks!</b> <span id="fw-call-pending"></span></span>
+    <button id="fw-call-join" class="fw-call-join">Join the Finale ✨</button>
+  </div>
+
+  <!-- ================= SCREENS ================= -->
+  <main id="app">
+
+    <!-- 1. WELCOME -->
+    <section class="screen active" id="screen-welcome">
+      <div class="welcome-inner">
+        <div class="welcome-cake">🎂</div>
+        <h1 class="title-glow">Ali Haider<br/>Online Birthday Room</h1>
+        <p class="subtitle">Trio Back is ready to celebrate the <span class="gold">Birthday Bear</span> 🐻</p>
+        <button class="btn btn-primary btn-lg" id="btn-enter">Enter Birthday Room ✨</button>
+      </div>
+    </section>
+
+    <!-- 2. PROFILE LOGIN -->
+    <section class="screen" id="screen-login">
+      <h2 class="screen-title">Choose Your <span class="gold">Trio</span> Profile</h2>
+      <div class="profile-grid">
+        <div class="profile-card glow-blue" data-user="panda">
+          <div class="profile-emoji">🐼</div>
+          <div class="profile-name">Panda</div>
+          <div class="profile-real">HORIZON</div>
+        </div>
+        <div class="profile-card glow-gold" data-user="bear">
+          <div class="badge-bday">Birthday Boy 👑</div>
+          <div class="profile-emoji">🐻</div>
+          <div class="profile-name">Bear</div>
+          <div class="profile-real gold">Ali Haider</div>
+        </div>
+        <div class="profile-card glow-ice" data-user="icebear">
+          <div class="profile-emoji">🐻‍❄️</div>
+          <div class="profile-name">Ice Bear</div>
+          <div class="profile-real">Faiqa</div>
+        </div>
+      </div>
+
+      <!-- PIN modal -->
+      <div class="pin-modal hidden" id="pin-modal">
+        <div class="pin-box glass">
+          <button class="pin-close" id="pin-close">✕</button>
+          <div class="pin-emoji" id="pin-emoji">🐼</div>
+          <h3 id="pin-title">Enter PIN</h3>
+          <input type="tel" inputmode="numeric" maxlength="6" id="pin-input" class="pin-input" placeholder="• • •" />
+          <p class="pin-msg" id="pin-msg"></p>
+          <button class="btn btn-primary" id="pin-submit">Unlock 🔓</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CONNECTING LOBBY -->
+    <section class="screen" id="screen-lobby">
+      <h2 class="screen-title">Connecting <span class="gold">Trio Back</span>…</h2>
+      <p class="lobby-count" id="lobby-count">0 / 3 joined</p>
+      <div class="lobby-grid">
+        <div class="lobby-card" data-user="panda">
+          <div class="lobby-emoji">🐼</div>
+          <div class="lobby-name">Panda</div>
+          <div class="lobby-status">Pending ⏳</div>
+        </div>
+        <div class="lobby-card" data-user="bear">
+          <div class="lobby-emoji">🐻</div>
+          <div class="lobby-name">Bear</div>
+          <div class="lobby-status">Pending ⏳</div>
+        </div>
+        <div class="lobby-card" data-user="icebear">
+          <div class="lobby-emoji">🐻‍❄️</div>
+          <div class="lobby-name">Ice Bear</div>
+          <div class="lobby-status">Pending ⏳</div>
+        </div>
+      </div>
+      <p class="lobby-all hidden" id="lobby-all">All Trio Connected 🎉</p>
+      <p class="lobby-hint" id="lobby-hint">Waiting for everyone to join…</p>
+      <button class="btn btn-primary btn-lg btn-locked" id="btn-go-celebration" disabled>Enter Main Dashboard 🔒</button>
+    </section>
+
+    <!-- 4. CELEBRATION START -->
+    <section class="screen" id="screen-celebration">
+      <div class="celebrate-inner">
+        <div class="hug-emoji">🫂</div>
+        <h1 class="title-glow">Trio Back is finally here</h1>
+        <p class="subtitle">Ready to celebrate <span class="gold">Ali Haider</span>?</p>
+        <button class="btn btn-primary btn-lg" id="btn-celebrate">Let's Celebrate 🎉</button>
+      </div>
+    </section>
+
+    <!-- 5+6. CAKE + CANDLES -->
+    <section class="screen" id="screen-cake">
+      <div class="cake-stage">
+        <div class="orbit orbit-top">🐻<span class="crown">👑</span></div>
+        <div class="orbit orbit-left">🐼</div>
+        <div class="orbit orbit-right">🐻‍❄️</div>
+
+        <div class="cake-wrap" id="cake-wrap">
+          <div class="cake">
+            <div class="candles">
+              <span class="candle"><i class="flame"></i></span>
+              <span class="candle"><i class="flame"></i></span>
+              <span class="candle"><i class="flame"></i></span>
+            </div>
+            <div class="cake-top">
+              <span class="heart">💗</span>
+              <span class="cake-name">Ali</span>
+              <span class="heart">💗</span>
+            </div>
+            <div class="cake-layer layer1"></div>
+            <div class="cake-layer layer2"></div>
+            <div class="cake-plate"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cake-actions">
+        <button class="btn btn-primary btn-lg hidden" id="btn-blow">Blow Candles 🎂</button>
+        <p class="cake-wait hidden" id="cake-wait">Waiting for Birthday Bear to blow candles… 🐻</p>
+        <h1 class="title-glow hidden" id="bday-text">Happy Birthday<br/>Ali Haider 🎉</h1>
+        <p class="subtitle hidden" id="bday-sub">Candles blown by the Birthday Bear 🐻</p>
+        <button class="btn btn-secondary hidden" id="btn-after-cake">Continue ➜</button>
+      </div>
+    </section>
+
+    <!-- 7. SURPRISE CHAT UNLOCK -->
+    <section class="screen" id="screen-surprise">
+      <div class="surprise-inner">
+        <!-- Non-bear: send message -->
+        <div id="surprise-friend" class="hidden">
+          <div class="gift-emoji">💬</div>
+          <h2 class="screen-title">Send your wish to the <span class="gold">Birthday Bear</span></h2>
+          <button class="btn btn-primary btn-lg" id="btn-send-bday">Send Birthday Message 💬</button>
+          <p class="muted" id="friend-sent-msg"></p>
+        </div>
+        <!-- Bear: open surprise -->
+        <div id="surprise-bear" class="hidden">
+          <div class="gift-emoji gift-bounce">🎁</div>
+          <h2 class="screen-title">There is a surprise for you…</h2>
+          <button class="btn btn-primary btn-lg" id="btn-open-surprise">Open Surprise Chat</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary hidden" id="btn-go-menu">Go to Main Menu ➜</button>
+    </section>
+
+    <!-- 9. MAIN MENU -->
+    <section class="screen" id="screen-menu">
+      <h2 class="screen-title">What should <span class="gold">Trio Back</span> do next?</h2>
+      <div class="menu-grid">
+        <button class="menu-card" data-go="chat">💬<span>Chat Surprise</span><span class="card-here" data-here="chat"></span></button>
+        <button class="menu-card" data-go="dare">🎡<span>Dare Wheel</span><span class="card-here" data-here="dare"></span></button>
+        <button class="menu-card" data-go="compat">🫂<span>Trio Compatibility</span><span class="card-here" data-here="compat"></span></button>
+        <button class="menu-card" data-go="memory">🧡<span>Memory Wall</span><span class="card-here" data-here="memory"></span></button>
+        <button class="menu-card" data-go="fireworks">🎆<span>Final Fireworks</span><span class="card-here" data-here="fireworks"></span></button>
+      </div>
+    </section>
+
+    <!-- 10. DARE WHEEL -->
+    <section class="screen" id="screen-dare">
+      <button class="back-btn" data-back="menu">← Menu</button>
+      <h2 class="screen-title">Dare Wheel 🎡</h2>
+      <div class="here-row" data-here="dare"></div>
+      <p class="turn-line">Current Turn: <span id="dare-turn-name">Panda 🐼</span></p>
+      <div class="wheel-wrap">
+        <div class="wheel-pointer">▼</div>
+        <div class="wheel" id="wheel"></div>
+        <button class="wheel-center" id="btn-spin">SPIN</button>
+      </div>
+      <p class="muted hidden" id="dare-wait"></p>
+      <div class="dare-result glass hidden" id="dare-result">
+        <p class="dare-result-who" id="dare-result-who"></p>
+        <p class="dare-result-text" id="dare-result-text"></p>
+        <button class="btn btn-success hidden" id="btn-dare-done">Done ✅</button>
+      </div>
+      <div class="react-bar" data-screen="dare"></div>
+    </section>
+
+    <!-- 11. COMPATIBILITY -->
+    <section class="screen" id="screen-compat">
+      <button class="back-btn" data-back="menu">← Menu</button>
+      <h2 class="screen-title">Trio Compatibility Test 🫂</h2>
+      <div class="here-row" data-here="compat"></div>
+
+      <!-- question + answering -->
+      <div class="compat-stage" id="compat-stage-question">
+        <div class="q-card glass">
+          <p class="q-counter" id="q-counter">Question 1/20</p>
+          <p class="q-text" id="q-text">…</p>
+          <div class="q-options" id="q-options"></div>
+          <p class="q-locked hidden" id="q-locked">Answer locked 🔒</p>
+        </div>
+        <div class="answer-status" id="answer-status"></div>
+        <p class="compat-wait hidden" id="compat-wait">Waiting for everyone to answer… ⏳</p>
+        <button class="btn btn-primary hidden" id="btn-show-reveal">Show Reveal 🎉</button>
+      </div>
+
+      <div class="react-bar" data-screen="compat"></div>
+
+      <!-- AUTO REVEAL POPUP (overlays everyone's screen when all answered) -->
+      <div class="reveal-modal hidden" id="reveal-modal">
+        <div class="reveal-modal-box glass">
+          <p class="reveal-counter" id="reveal-counter">Question 1/20</p>
+          <p class="reveal-question" id="reveal-question">…</p>
+          <div class="reveal-box" id="reveal-box">
+            <h3 class="reveal-title">Reveal Time 🎉</h3>
+            <div id="reveal-list"></div>
+            <p class="reveal-most" id="reveal-most"></p>
+          </div>
+          <button class="btn btn-primary" id="btn-next-q">Next Question ➜</button>
+          <button class="btn btn-secondary hidden" id="btn-compat-done">Finish ➜ Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. MEMORY WALL -->
+    <section class="screen" id="screen-memory">
+      <button class="back-btn" data-back="menu">← Menu</button>
+      <h2 class="screen-title">Memory Wall for <span class="gold">Ali</span> 🧡</h2>
+      <div class="here-row" data-here="memory"></div>
+      <div class="memory-input glass" id="memory-input-box">
+        <p>Write one memory for Ali</p>
+        <textarea id="memory-text" rows="3" placeholder="Ali ke sath sabse funny/cute memory…"></textarea>
+        <button class="btn btn-primary" id="btn-submit-memory">Submit Memory</button>
+      </div>
+      <div class="answer-status" id="memory-status"></div>
+      <div class="reveal-box hidden" id="memory-reveal">
+        <h3 class="reveal-title">Memories for Ali 🧡</h3>
+        <div id="memory-list"></div>
+      </div>
+      <div class="react-bar" data-screen="memory"></div>
+    </section>
+
+    <!-- 13. FINAL FIREWORKS -->
+    <section class="screen" id="screen-fireworks">
+      <button class="back-btn" data-back="menu" id="fw-back">← Menu</button>
+      <div class="fw-inner">
+        <h1 class="title-glow">Happy Birthday<br/>Ali Haider 🎂</h1>
+        <p class="subtitle">From Panda, Bear &amp; Ice Bear — <span class="gold">Trio Back Forever</span> 🫂</p>
+
+        <!-- Stage A: Panda launches -->
+        <div id="fw-stage-launch">
+          <button class="btn btn-primary btn-lg hidden" id="btn-fw-launch">Launch Final Fireworks 🎆</button>
+          <p class="subtitle hidden" id="fw-wait-panda">Waiting for Panda 🐼 to start the finale…</p>
+        </div>
+
+        <!-- Stage B: ready check (full-screen) -->
+        <div id="fw-stage-ready" class="fw-ready hidden">
+          <div class="fw-spark">🎆</div>
+          <h2 class="title-glow">Final Fireworks 🎆</h2>
+          <p class="subtitle">Everyone tap when you're ready — the sky lights up the moment all 3 are in!</p>
+          <button class="btn btn-success btn-lg" id="btn-fw-ready">Okay, Let's Do It! 🎆</button>
+          <!-- live waiting area: 3 member cards with ready/waiting state -->
+          <div class="fw-waiting" id="fw-waiting"></div>
+          <p class="fw-ready-count" id="fw-ready-count">0 / 3 ready</p>
+          <div class="answer-status hidden" id="fw-ready-status"></div>
+        </div>
+
+        <!-- Stage C: show -->
+        <div class="dancers hidden" id="dancers">🐼 🐻👑 🐻‍❄️</div>
+        <h2 class="title-glow gold hidden" id="fw-final">Birthday Bear, you are officially celebrated 🐻👑</h2>
+        <p class="fw-letter glass hidden" id="fw-letter"></p>
+        <button class="btn btn-primary btn-lg hidden" id="btn-fw-menu">Back to Main Menu 🏠</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== CHAT slide tab (stays on side) ===== -->
+  <button class="chat-tab" id="chat-tab" aria-label="Open chat">
+    <span class="chat-tab-icon">💬</span>
+    <span class="chat-tab-label">Chat</span>
+    <span class="chat-dot hidden" id="chat-dot"></span>
+    <span class="chat-here" id="chat-here"></span>
+  </button>
+
+  <!-- ===== CHAT sheet ===== -->
+  <div class="chat-backdrop hidden" id="chat-backdrop"></div>
+  <div class="chat-sheet" id="chat-sheet">
+    <div class="chat-header">
+      <span class="chat-title">Trio Back Chat 💬</span>
+      <span class="chat-here-row" id="chat-here-row"></span>
+      <button class="chat-close" id="chat-close">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-typing" id="chat-typing"></div>
+    <div class="emoji-picker hidden" id="emoji-picker"></div>
+    <div class="chat-input-row">
+      <button class="chat-emoji-btn" id="chat-emoji-btn">😊</button>
+      <input type="text" id="chat-input" autocomplete="off" placeholder="Type a message…" />
+      <button class="chat-send" id="chat-send">➤</button>
+    </div>
+  </div>
+
+  <!--
+    Firebase SDK (compat) is loaded dynamically so a slow/blocked CDN
+    never prevents the room from booting. If it loads, live multiplayer
+    works; if not, the room falls back to local demo mode automatically.
+  -->
+  <script>
+    (function () {
+      var SDK = [
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"
+      ];
+      var APP = ["js/firebase-config.js", "js/data.js", "js/effects.js", "js/app.js"];
+
+      function loadSeq(list, done) {
+        var i = 0;
+        (function next() {
+          if (i >= list.length) { done(); return; }
+          var s = document.createElement("script");
+          s.src = list[i++];
+          s.onload = next;
+          s.onerror = next; // skip on failure, keep going
+          document.body.appendChild(s);
+        })();
+      }
+      // load SDK (best-effort), then always load the app scripts in order.
+      loadSeq(SDK, function () { loadSeq(APP, function () {}); });
+    })();
+  </script>
+</body>
+</html>
